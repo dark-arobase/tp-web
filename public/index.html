@@ -1,88 +1,123 @@
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BES Loan Lite</title>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
-    <link rel="stylesheet" href="https://bulma.io/vendor/fontawesome-free-6.5.2-web/css/all.min.css">
+    <title>BES Loan Lite - Dashboard</title>
+
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+
+    <style>
+        /* Agrandir la navbar et centrer les liens */
+        .navbar {
+            padding: 1rem 2rem;
+            font-size: 1.3rem;
+        }
+        .navbar-menu {
+            justify-content: center;
+        }
+        .navbar-item {
+            padding: 1rem 1.5rem;
+        }
+        /* Titre plus centré et plus espacés */
+        .title, .subtitle {
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* Table plus large et plus jolie */
+        .dashboard-table {
+            margin-top: 30px;
+        }
+    </style>
 </head>
+
 <body>
+
+    <!-- NAVBAR -->
     <nav class="navbar is-dark">
         <div class="navbar-brand">
-        <a class="navbar-item" href="index.html">
-            Dashboard
-        </a>
-            <a class="navbar-item" href="clients.html">
-            Clients
-        </a>
-            <a class="navbar-item is-active" href="loans.html">
-            Prêts
-        </a>
-            <a class="navbar-item is-active" href="payments.html">
-            Paiements
-        </a>
-		<a class="navbar-item" href="client.html">Client</a>
-          </div>
+            <a class="navbar-item" href="index.html">
+                BES Loan Lite
+            </a>
+
+            <a role="button" class="navbar-burger" data-target="menu" aria-label="menu" aria-expanded="false">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
         </div>
-      </nav>
 
+        <div id="menu" class="navbar-menu">
+            <div class="navbar-start">
 
+                <a class="navbar-item" href="index.html">Dashboard</a>
+                <a class="navbar-item" href="clients.html">Clients</a>
+                <a class="navbar-item" href="loans.html">Prêts</a>
+                <a class="navbar-item" href="payments.html">Paiements</a>
+                <a class="navbar-item" href="client.html">Client</a>
 
-    <h1 class="title">Bienvenue dans le Dashboard</h1>
+            </div>
+        </div>
+    </nav>
 
-    <h2 class="subtitle"> voici les vue densemble </h2>
+    <!-- DASHBOARD -->
+    <section class="section">
+        <div class="container">
 
-    <h2 class="subtitle">Le Dashboard est donc la page qui donne une vue globale de la situation financière de l'entreprise.</h2>
+            <h1 class="title">Bienvenue dans le Dashboard</h1>
+            <h2 class="subtitle">Vue d’ensemble de la situation financière</h2>
 
-    <div>
-    
-    <table class="table is-striped is-fullwidth">
-        <tr>
-            <th>•	Prêts Actifs</th>
-            <th>•	Prêts Remboursés</th>
-            <th>•	Prêts en Retard</th>
-            <th>•	montant total prêté</th>
-            <th>•	montant total remboursé</th>
-            <th>•	client en retard</th>
-        </tr>
+            <!-- TABLEAU DES STATISTIQUES -->
+            <table class="table is-fullwidth is-striped dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Prêts Actifs</th>
+                        <th>Prêts Remboursés</th>
+                        <th>Prêts en Retard</th>
+                        <th>Montant Total Prêté</th>
+                        <th>Montant Total Remboursé</th>
+                        <th>Client en Retard</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    <tr>
+                        <td>10</td>
+                        <td>5</td>
+                        <td>2</td>
+                        <td>10 000 €</td>
+                        <td>5 000 €</td>
+                        <td>John Doe (5 jours)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- DESCRIPTION -->
+            <div class="box">
+                <p>
+                    Le Dashboard vous permet d’avoir une vue globale sur :
+                </p>
+                <br>
+                <ul>
+                    <li>• Le Nombre de prêts actifs, remboursés et en retard</li>
+                    <li>• Le Montant total prêté</li>
+                    <li>• Le Montant total remboursé</li>
+                    <li>• Les Clients en retard</li>
+                    <li>• Un Indicateur dans le menu pour signaler les retards</li>
+                </ul>
+            </div>
+
+        </div>
+    </section>
+	
+	<footer class="footer">
+    <div class="content has-text-centered">
+      <p><strong>BES Loan Lite</strong> — Microcrédit interne © 2025</p>
     </div>
-    <tbody>
-        <tr>
-            <td>10</td>
-            <td>5</td>
-            <td>2</td>
-            <td>10000€</td>
-            <td>5000€</td>
-            <td>John Doe (5 jours)</td>
-        </tr>
-    </tbody>
-    </table>
-    
+  </footer>
+
 </body>
 </html>
 
-Accueil - Dashboard
-Lorsque vous ouvrez l'application, la première page est le Dashboard.
-C'est une vue d'ensemble qui montre :
-<br>
-<br>
-<br>
-<br>
-•	Le nombre de prêts actifs, remboursés et en retard.
-<br>
-•	Le montant total prêté par l'entreprise.
-<br>
-•	Le montant total déjà remboursé par les clients.
-<br>
-•	Une liste des clients en retard, avec le nombre de jours de retard.
-<br>
-•	Une pastille rouge dans le menu qui indique combien de prêts sont en retard.
-<br>
-<br>
-<br>
-
-Le Dashboard est donc la page qui donne une vue globale de la situation financière de l'entreprise.
-Accueil - Dashboard
 
 
 <!-- Clients 

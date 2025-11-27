@@ -5,20 +5,57 @@
     <title>BES Loan Lite-client</title>
     <link rel="icon" type="image/x-icon" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+
+     <style>
+        /* Agrandir la navbar et centrer les liens */
+        .navbar {
+            padding: 1rem 2rem;
+            font-size: 1.3rem;
+        }
+        .navbar-menu {
+            justify-content: center;
+        }
+        .navbar-item {
+            padding: 1rem 1.5rem;
+        }
+        /* Titre plus centré et plus espacés */
+        .title, .subtitle {
+            text-align: center;
+            margin-top: 20px;
+        }
+        /* Table plus large et plus jolie */
+        .dashboard-table {
+            margin-top: 30px;
+        }
+    </style>
 </head>
 <body>
-      <nav class="navbar is-dark">
+      <!-- NAVBAR -->
+    <nav class="navbar is-dark">
         <div class="navbar-brand">
-          <a class="navbar-item" href="index.html">
-            BES Loan Lite
-          </a>
+            <a class="navbar-item" href="index.html">
+                BES Loan Lite
+            </a>
+
+            <a role="button" class="navbar-burger" data-target="menu" aria-label="menu" aria-expanded="false">
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+                <span aria-hidden="true"></span>
+            </a>
         </div>
-        <div class="navbar-menu">
-          <div class="navbar-start">
-            <a class="navbar-item is-active" href="clients.html">Clients</a>
-          </div>
+
+        <div id="menu" class="navbar-menu">
+            <div class="navbar-start">
+
+                <a class="navbar-item" href="index.html">Dashboard</a>
+                <a class="navbar-item" href="clients.html">Clients</a>
+                <a class="navbar-item" href="loans.html">Prêts</a>
+                <a class="navbar-item" href="payments.html">Paiements</a>
+                <a class="navbar-item" href="client.html">Client</a>
+
+            </div>
         </div>
-      </nav>
+    </nav>
     
 
     
