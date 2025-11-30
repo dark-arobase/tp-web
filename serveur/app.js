@@ -2,7 +2,7 @@ const express = require('express')
 const path = require('path')
 const crypto = require('crypto')
 
-const {db, createTable} = require('./db')
+const { db, createTable } = require('./db')
 
 const app = express()
 
@@ -10,13 +10,13 @@ app.use(express.json())
 
 app.use(express.static(path.join(__dirname, '../public')))
 
-app.get('/', (req, res)=>{
-  res.sendFile(path.join(__dirname, "../public", "index.html"));
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, "../public", "index.html"));
 })
 
-/* =========================
-   ROUTE : AJOUT CLIENT
-   ========================= */
+    
+// Route ajouter un client
+
 app.post('/api/clients', async (req, res) => {
     try {
         const { nom, prenom, telephone, email, adresse } = req.body;
@@ -34,9 +34,9 @@ app.post('/api/clients', async (req, res) => {
     }
 });
 
-/* =========================
-   ROUTE : LISTE CLIENTS
-   ========================= */
+
+// Route liste des clients
+
 app.get('/api/clients', async (req, res) => {
     try {
         const clients = await db('clients').select('*');
@@ -47,13 +47,52 @@ app.get('/api/clients', async (req, res) => {
     }
 });
 
+
+
+// modifier un client (PUT)
+app.put('/api/clients/:id', async (req, res)=>{
+  try{
+    const { id } = req.params
+    const { nom, prenom, telephone, email, adresse } = req.body
+
+    const updated = await db('clients')
+                          .whereRaw('LOWER(id)=?', [id.toLowerCase()])
+                          .update({ nom, prenom, telephone, email, adresse })
+
+    if(updated) res.json({ success: true })
+    else res.json({ success: false })
+  }catch(err){
+    console.error(err)
+    res.status(500).json({ success:false, error:'Erreur serveur' })
+  }
+})
+
+// supprimer un client (DELETE)
+app.delete('/api/clients/:id', async (req, res)=>{
+  try{
+    const { id } = req.params
+    const deleted = await db('clients')
+                          .whereRaw('LOWER(id)=?', [id.toLowerCase()])
+                          .del()
+    if(deleted) res.json({ success: true })
+    else res.json({ success: false })
+  }catch(err){
+    console.error(err)
+    res.status(500).json({ success:false, error:'Erreur serveur' })
+  }
+})
+
+
+
+// Démarrage serveur
+
 createTable()
-.then(()=>{
-   app.listen(3000, ()=>{
-    console.log("Serveur en cours d'execution sur le port 3000")
-});
-})
-.catch((err)=>{
-   console.error("Erreur au demarrage du schema", err);
-   process.exit(1);
-})
+    .then(() => {
+        app.listen(3000, () => {
+            console.log("Serveur en cours d'exécution sur le port 3000")
+        });
+    })
+    .catch((err) => {
+        console.error("Erreur au démarrage du schema", err);
+        process.exit(1);
+    })

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BES Loan Lite - Paiements</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+
+  <style>
+    /* Agrandir la navbar et centrer les liens */
+    .navbar { padding: 1rem 2rem; font-size: 1.3rem; }
+    .navbar-menu { justify-content: center; }
+    .navbar-item { padding: 1rem 1.5rem; }
+    .title, .subtitle { text-align: center; margin-top: 20px; }
+    .dashboard-table { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar is-dark">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="index.html">BES Loan Lite</a>
+      <a role="button" class="navbar-burger" data-target="menu" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div id="menu" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="index.html">Dashboard</a>
+        <a class="navbar-item" href="prets.html">Prêts</a>
+        <a class="navbar-item is-active" href="paiements.html">Paiements</a>
+        <a class="navbar-item" href="client.html">Client</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="container">
+      <h1 class="title">Gestion des paiements</h1>
+      <h2 class="subtitle">Enregistrer un paiement</h2>
+
+      <div class="box">
+        <form id="payment-form">
+          <input type="hidden" id="payment-id">
+
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label">ID du prêt</label>
+                <div class="control">
+                  <input id="loan-id" class="input" type="text" placeholder="ID du prêt" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="field">
+                <label class="label">Montant</label>
+                <div class="control">
+                  <input id="montant" class="input" type="number" step="0.01" placeholder="Montant" required>
+                </div>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="field">
+                <label class="label">Date</label>
+                <div class="control">
+                  <input id="date" class="input" type="date" required>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="columns">
+            <div class="column">
+              <div class="field">
+                <label class="label">Mode</label>
+                <div class="control">
+                  <input id="mode" class="input" type="text" placeholder="Cash, Virement...">
+                </div>
+              </div>
+            </div>
+
+            <div class="column">
+              <div class="field">
+                <label class="label">Note</label>
+                <div class="control">
+                  <input id="note" class="input" type="text" placeholder="Note (optionnel)">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="field is-grouped">
+            <div class="control"><button class="button is-primary" id="submit-payment" type="submit">Ajouter</button></div>
+            <div class="control"><button class="button is-danger" type="button" id="cancel-payment">Annuler</button></div>
+          </div>
+
+          <div id="payment-success" class="notification is-success" style="display:none">Paiement enregistré</div>
+          <div id="payment-error" class="notification is-danger" style="display:none">Erreur</div>
+        </form>
+      </div>
+
+      <div class="box">
+        <h2 class="subtitle">Liste des paiements</h2>
+        <table class="table is-fullwidth is-striped" id="payments-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>ID Prêt</th>
+              <th>Montant</th>
+              <th>Date</th>
+              <th>Mode</th>
+              <th>Note</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p><strong>BES Loan Lite</strong> — Microcrédit interne © 2025</p>
+    </div>
+  </footer>
+
+  <script>
+    // JS simple: add/get/delete payments (à connecter au backend)
+    async function loadPayments(){
+      try{
+        const res = await fetch('/api/paiements')
+        const list = await res.json()
+        const tbody = document.querySelector('#payments-table tbody')
+        tbody.innerHTML = ''
+        list.forEach(p=>{
+          const tr = document.createElement('tr')
+          tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.loanId}</td>
+            <td>${p.montant}</td>
+            <td>${p.date}</td>
+            <td>${p.mode}</td>
+            <td>${p.note||''}</td>
+            <td>
+              <button class="button is-small is-danger" onclick="deletePayment('${p.id}')">Supprimer</button>
+            </td>
+          `
+          tbody.appendChild(tr)
+        })
+      }catch(err){ console.error(err) }
+    }
+
+    document.getElementById('payment-form').addEventListener('submit', async (e)=>{
+      e.preventDefault()
+      const data = {
+        loanId: document.getElementById('loan-id').value,
+        montant: parseFloat(document.getElementById('montant').value),
+        date: document.getElementById('date').value,
+        mode: document.getElementById('mode').value,
+        note: document.getElementById('note').value
+      }
+      try{
+        const res = await fetch('/api/paiements', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) })
+        const out = await res.json()
+        if(out.success){ document.getElementById('payment-success').style.display='block'; loadPayments(); setTimeout(()=>{document.getElementById('payment-success').style.display='none'},2500) } else document.getElementById('payment-error').style.display='block'
+      }catch(err){ console.error(err); document.getElementById('payment-error').style.display='block' }
+    })
+
+    async function deletePayment(id){
+      if(!confirm('Supprimer ce paiement ?')) return
+      try{
+        const res = await fetch(`/api/paiements/${id}`, { method:'DELETE' })
+        const out = await res.json()
+        if(out.success) loadPayments()
+        else alert('Erreur')
+      }catch(err){ console.error(err) }
+    }
+
+    loadPayments()
+  </script>
+</body>
+</html>
