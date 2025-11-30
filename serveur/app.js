@@ -1,8 +1,17 @@
 const express = require('express')
 const path = require('path')
-const crypto = require('crypto')
+
 
 const { db, createTable } = require('./db')
+
+
+// import des routes
+const clientsRoutes = require('./api/gestionClients.js')
+
+const loansRoutes = require('./api/gestionLoans.js')
+
+const paiementsRoutes = require('./api/gestionPaiements');
+
 
 const app = express()
 
@@ -14,26 +23,23 @@ app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, "../public", "index.html"));
 })
 
+<<<<<<< HEAD
     
 // Route ajouter un client
 
 app.post('/api/clients', async (req, res) => {
     try {
         const { nom, prenom, telephone, email, adresse } = req.body;
+=======
+>>>>>>> 840bcd43a1ccf8f7deff07fc4f89a68a50a596d8
 
-        const id = crypto.randomUUID();
+app.use('/', clientsRoutes);
 
-        await db('clients').insert({
-            id, nom, prenom, telephone, email, adresse
-        });
+app.use('/', loansRoutes);
 
-        res.json({ success: true, id });
-    } catch (err) {
-        console.error(err);
-        res.status(500).json({ success: false, error: 'Erreur serveur' });
-    }
-});
+app.use('/', paiementsRoutes);
 
+<<<<<<< HEAD
 
 // Route liste des clients
 
@@ -46,6 +52,9 @@ app.get('/api/clients', async (req, res) => {
         res.status(500).json({ error: 'Erreur serveur' });
     }
 });
+=======
+//app.use('/',
+>>>>>>> 840bcd43a1ccf8f7deff07fc4f89a68a50a596d8
 
 
 
