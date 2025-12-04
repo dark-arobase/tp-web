@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BES Loan Lite - Paiements</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+
+  <style>
+    /* Agrandir la navbar et centrer les liens */
+    .navbar { padding: 1rem 2rem; font-size: 1.3rem; }
+    .navbar-menu { justify-content: center; }
+    .navbar-item { padding: 1rem 1.5rem; }
+    .title, .subtitle { text-align: center; margin-top: 20px; }
+    .dashboard-table { margin-top: 30px; }
+  </style>
+</head>
+<body>
+  <!-- NAVBAR -->
+  <nav class="navbar is-dark">
+    <div class="navbar-brand">
+      <a class="navbar-item" href="index.html">BES Loan Lite</a>
+      <a role="button" class="navbar-burger" data-target="menu" aria-label="menu" aria-expanded="false">
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+        <span aria-hidden="true"></span>
+      </a>
+    </div>
+    <div id="menu" class="navbar-menu">
+      <div class="navbar-start">
+        <a class="navbar-item" href="index.html">Dashboard</a>
+        <a class="navbar-item" href="prets.html">Prêts</a>
+        <a class="navbar-item is-active" href="paiements.html">Paiements</a>
+        <a class="navbar-item" href="client.html">Client</a>
+      </div>
+    </div>
+  </nav>
+
+  <section class="section">
+        <div class="container">
+            <h1 class="title">Gestion des prêts</h1>
+            <h2 class="subtitle">Ajouter un nouveau prêt</h2>
+
+            <div class="box">
+                <form id="loan-form">
+                    <input type="hidden" id="loan-id">
+
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label" for="client">Client:</label>
+                                <div class="control">
+                                    <input class="input" type="text" id="client" name="client" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="field">
+                                <label class="label" for="montant">Montant:</label>
+                                <div class="control">
+                                    <input class="input" type="number" id="montant" name="montant" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="columns">
+                        <div class="column">
+                            <div class="field">
+                                <label class="label" for="taux">Taux annuel (%):</label>
+                                <div class="control">
+                                    <input class="input" type="number" id="taux" name="taux" required>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <div class="field">
+                                <label class="label" for="duree">Durée (mois):</label>
+                                <div class="control">
+                                    <input class="input" type="number" id="duree" name="duree" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label class="label" for="date-debut">Date de début:</label>
+                        <input class="input" type="date" id="date-debut" name="date-debut" required>
+                    </div>
+
+                    <div class="field is-grouped">
+                        <div class="control">
+                            <button class="button is-primary" type="submit" id="submit-btn">Ajouter le prêt</button>
+                        </div>
+                        <div class="control">
+                            <button class="button is-danger" type="button" id="cancel-edit">Annuler</button>
+                        </div>
+                    </div>
+                </form>
+
+                <div class="notification is-success" id="success-message" style="display:none;">
+                    Prêt ajouté avec succès !
+                </div>
+                <div class="notification is-danger" id="error-message" style="display:none;">
+                    Une erreur est survenue. Veuillez réessayer.
+                </div>
+            </div>
+
+            <h2 class="subtitle">Liste des prêts enregistrés</h2>
+
+            <table class="table is-fullwidth is-striped" id="loans-table">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Client</th>
+                        <th>Montant</th>
+                        <th>Taux</th>
+                        <th>Durée</th>
+                        <th>Début</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+  <footer class="footer">
+    <div class="content has-text-centered">
+      <p><strong>BES Loan Lite</strong> — Microcrédit interne © 2025</p>
+    </div>
+  </footer>
+
+  <script>
+    // JS simple: add/get/delete payments (à connecter au backend)
+    async function loadPayments(){
+      try{
+        const res = await fetch('/api/paiements')
+        const list = await res.json()
+        const tbody = document.querySelector('#payments-table tbody')
+        tbody.innerHTML = ''
+        list.forEach(p=>{
+          const tr = document.createElement('tr')
+          tr.innerHTML = `
+            <td>${p.id}</td>
+            <td>${p.loanId}</td>
+            <td>${p.montant}</td>
+            <td>${p.date}</td>
+            <td>${p.mode}</td>
+            <td>${p.note||''}</td>
+            <td>
+              <button class="button is-small is-danger" onclick="deletePayment('${p.id}')">Supprimer</button>
+            </td>
+          `
+          tbody.appendChild(tr)
+        })
+      }catch(err){ console.error(err) }
+    }
+
+    document.getElementById('payment-form').addEventListener('submit', async (e)=>{
+      e.preventDefault()
+      const data = {
+        loanId: document.getElementById('loan-id').value,
+        montant: parseFloat(document.getElementById('montant').value),
+        date: document.getElementById('date').value,
+        mode: document.getElementById('mode').value,
+        note: document.getElementById('note').value
+      }
+      try{
+        const res = await fetch('/api/paiements', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(data) })
+        const out = await res.json()
+        if(out.success){ document.getElementById('payment-success').style.display='block'; loadPayments(); setTimeout(()=>{document.getElementById('payment-success').style.display='none'},2500) } else document.getElementById('payment-error').style.display='block'
+      }catch(err){ console.error(err); document.getElementById('payment-error').style.display='block' }
+    })
+
+    async function deletePayment(id){
+      if(!confirm('Supprimer ce paiement ?')) return
+      try{
+        const res = await fetch(`/api/paiements/${id}`, { method:'DELETE' })
+        const out = await res.json()
+        if(out.success) loadPayments()
+        else alert('Erreur')
+      }catch(err){ console.error(err) }
+    }
+
+    loadPayments()
+  </script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!--Gestion des Prêts
+Une fois qu’un client est enregistré, vous pouvez aller dans le menu Prêts.
+•	Le formulaire permet de créer un nouveau prêt pour un client sélectionné dans la liste déroulante.
+•	Vous entrez le montant, le taux d’intérêt, la durée (en mois) et la date de début.
+•	L’application calcule automatiquement :
+o	les intérêts cumulés,
+o	le solde restant,
+o	le statut du prêt (ACTIF, REMBOURSÉ, EN RETARD).
+•	La table des prêts affiche toutes ces informations, avec des filtres (par statut ou par client) et de la pagination.
+Les prêts évoluent en fonction des paiements : ce n’est pas statique, c’est mis à jour automatiquement.
