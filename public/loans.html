@@ -95,8 +95,6 @@
                         <div class="control has-icons-left">
                             <input class="input" type="date" id="date" required>
                             <span class="icon is-left"><i class="fas fa-calendar-alt"></i></span>
-
-                            <span class="icon is-left"><i class="fas fa-calendar-alt"></i></span>
                         </div>
                         <p class="help is-danger" id="date-error" style="display:none;"></p>
                     </div>
@@ -126,35 +124,44 @@
     </form>
     <!--- <div id="loan-success" class="notification is-success" style="display:none">Prêt enregistré avec succès</div>
     <div id="loan-error" class="notification is-danger" style="display:none">Erreur lors de l'enregistrement</div>-->
-    <h2 class="subtitle">Liste des prêts</h2>
+    <h2 class="subtitle">Liste des prêts déjà enregistrés</h2>
 
     <div class="box">
         <!-- Filtres -->
         <div class="columns">
             <div class="column">
                 <label class="label">Statut</label>
+                <div class="control has-icons-left">
                 <div class="select is-fullwidth">
                     <select id="filter-status">
                         <option value="">Tous</option>
-                        <option value="Actif">Actif</option>
-                        <option value="Remboursé">Remboursé</option>
-                        <option value="EnRetard">En retard</option>
+                        <option value="ACTIF">Actif</option>
+                        <option value="REMBOURSÉ">Remboursé</option>
+                        <option value="ENRETARD">En retard</option>
                     </select>
+                </div>
+                <span class="icon is-left"><i class="fas fa-filter"></i></span>
                 </div>
             </div>
 
             <div class="column">
                 <label class="label">Client</label>
-                <div class="select is-fullwidth">
-                    <select id="filter-client">
-                        <option value="">Tous les clients</option>
-                    </select>
+                <div class="control has-icons-left">
+                    <div class="select is-fullwidth">
+                        <select id="filter-client">
+                            <option value="">Tous les clients</option>
+                        </select>
+                    </div>
+                    <span class="icon is-left"><i class="fas fa-search"></i></span>
                 </div>
             </div>
 
             <div class="column">
                 <label class="label">Recherche</label>
-                <input class="input" id="search-loan" type="text" placeholder="Nom, ID...">
+                <div class="control has-icons-left">
+                    <input class="input" id="search-loan" type="text" placeholder="Nom, ID...">
+                    <span class="icon is-left"><i class="fas fa-search"></i></span>
+                </div>
             </div>
         </div>
 
@@ -162,14 +169,14 @@
         <table class="table is-fullwidth is-striped" id="loans-table">
             <thead>
                 <tr>                    
-                    <th>Client</th>
-                    <th>Montant</th>
-                    <th>Taux (%)</th>
-                    <th>Durée (mois)</th>
-                    <th>Date début</th>
-                    <th>Intérêts cumulés</th>
-                    <th>Solde</th>
-                    <th>Statut</th>
+                    <th class="sort-link" data-column="client">Client <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="montant">Montant <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="taux">Taux (%) <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="duree">Durée (mois) <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="date">Date début <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="interets">Intérêts cumulés <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="solde">Solde <span class="sort-icon"></span></th>
+                    <th class="sort-link" data-column="statut">Statut <span class="sort-icon"></span></th>
                     <th>Actions</th>
                 </tr>
             </thead>

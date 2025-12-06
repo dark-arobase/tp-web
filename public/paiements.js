@@ -2,10 +2,15 @@
 // VARIABLES
 // =====================================================
 let loans = [];
-let filteredLoans = [];
 let clients = [];
+let paiements = [];
+let filteredPaiements = [];
+
 let currentPage = 1;
-let loansPerPage = 8;
+const paymentsPerPage = 10; // nombre de paiements par page
+
+const paginationContainer = document.getElementById("pagination");
+
 
 // =====================================================
 // SELECTEURS FORM
@@ -28,273 +33,282 @@ cancelEdit.style.display = "none";
 
 
 // =====================================================
-// 1. Load Clients
+// 1. Charger les clients
 // =====================================================
 async function loadClients() {
     try {
         const res = await fetch("/allClients");
         clients = await res.json();
-
-        loanClientSelect.innerHTML = `
-            <option value="">Sélectionnez un client</option>
-            ${clients.map(c => `<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join("")}
-        `;
-
-        document.getElementById("filter-client").innerHTML = `
-            <option value="">Tous les clients</option>
-            ${clients.map(c => `<option value="${c.id}">${c.prenom} ${c.nom}</option>`).join("")}
-        `;
-
     } catch (err) {
         console.error(err);
-        showError("Impossible de charger les clients");
+        showError("Erreur chargement clients");
     }
 }
 
 
 // =====================================================
-// 2. Load Loans
+// 2. Charger les prêts + remplir le SELECT
 // =====================================================
 async function loadLoans() {
     try {
-        const res = await fetch('/allLoans');
-        if (!res.ok) {
-            alert('Erreur lors de la recuperation des prêts');
-            return;
-        }
+        const res = await fetch("/allLoans");
         loans = await res.json();
-        filteredLoans = [...loans];
-        currentPage = 1;
-        AffichageLoans();
-        renderPagination();
+
+        loanSelect.innerHTML = `
+            <option value="">Sélectionnez un prêt</option>
+            ${loans.map(l => {
+                const c = clients.find(x => x.id === l.client_id);
+                const nom = c ? `${c.prenom} ${c.nom}` : "Client inconnu";
+                return `<option value="${l.id}">${nom} - ${l.montant}$ (Solde: ${l.solde}$)</option>`;
+            }).join("")}
+        `;
     } catch (err) {
         console.error(err);
-        alert('Erreur lors de la recuperation des prêts');
+        showError("Erreur chargement prêts");
     }
 }
 
 
 // =====================================================
-// 3. Affichage paiements
+// 3. Charger les paiements
 // =====================================================
-function AffichagePaiements() {
+async function loadPayments() {
+    const loanId = loanSelect.value;
+    let res;
+
+    try {
+        if (loanId) {
+            res = await fetch(`/paiements/${loanId}`);
+        } else {
+            res = await fetch(`/allPaiements`);
+        }
+
+        paiements = await res.json();
+        filteredPaiements = paiements;
+
+        currentPage = 1;
+        paginatePayments();
+
+    } catch (err) {
+        console.error(err);
+        showError("Erreur chargement paiements");
+    }
+}
+
+
+// =====================================================
+// 4. Affichage tableau + pagination
+// =====================================================
+function renderPayments(list = paiements) {
     paymentsTableBody.innerHTML = "";
-    
+
     if (list.length === 0) {
-        clientsTableBody.innerHTML =
-            `<tr><td colspan="6" class="has-text-centered">Aucun Paiements trouvé</td></tr>`;
+        paymentsTableBody.innerHTML =
+            `<tr><td colspan="6" class="has-text-centered">Aucun paiement trouvé</td></tr>`;
         return;
     }
-    const start = (currentPage - 1) * loansPerPage;
-    const end = start + loansPerPage;
 
-    filteredLoans.slice(start, end).forEach(l => {
-        const client = clients.find(c => String(c.id) === String(l.client_id));
+    list.forEach(p => {
+        const loan = loans.find(l => l.id == p.loan_id);
+        const client = loan ? clients.find(c => c.id == loan.client_id) : null;
+
+        const name = client ? `${client.prenom} ${client.nom}` : "Client inconnu";
 
         const row = document.createElement("tr");
         row.innerHTML = `
-            <td>${client ? client.prenom + " " + client.nom : "—"}</td>
-            <td>${l.montant}$</td>
-            <td>${l.taux}%</td>
-            <td>${l.duree} mois</td>
-            <td>${l.date}</td>
-            <td>${l.interets || 0}$</td>
-            <td>${l.solde || 0}$</td>
-            <td>${l.statut}</td>
-            <td>
-                <button class="button is-small is-primary" data-edit="${l.id}">
-                    <i class="fas fa-edit"></i>
+            <td>${name}</td>
+            <td>${p.montant}$</td>
+            <td>${p.date}</td>
+            <td>${p.mode}</td>
+            <td>${p.note || "—"}</td>
+            <td class="is-flex" style="gap:6px;">
+                <button class="button is-small is-primary" data-edit="${p.id}">
+                    <i class="fas fa-pen"></i>
                 </button>
-                <button class="button is-small is-danger" data-del="${l.id}">
+                <button class="button is-small is-danger" data-del="${p.id}">
                     <i class="fas fa-trash"></i>
                 </button>
             </td>
         `;
-        loansTableBody.appendChild(row);
+        paymentsTableBody.appendChild(row);
     });
 }
 
-// =====================================================
-// 4. Pagination
-// =====================================================
 
-function renderPagination() {
-    const totalPages = Math.ceil(filteredLoans.length / loansPerPage);
-    const pagination = document.getElementById("pagination");
-    
-    pagination.innerHTML = "";
-    
-    if (totalPages === 0) return;
-    for (let i = 1; i <= totalPages; i++) {
-        const btn = document.createElement("button");
-        btn.className = `button ${i === currentPage ? "is-link" : ""}`;
-        btn.textContent = i;
+// =============================
+// PAGINATION
+// =============================
+function paginatePayments() {
+    const start = (currentPage - 1) * paymentsPerPage;
+    const end = start + paymentsPerPage;
 
-        btn.addEventListener("click", () => {
-            currentPage = i;
-            AffichageLoans();
-            renderPagination();
-        });
-        pagination.appendChild(btn);
-    }
+    const pageList = filteredPaiements.slice(start, end);
+
+    renderPayments(pageList);
+    renderPaymentsPagination();
 }
 
+function renderPaymentsPagination() {
+    if (!paginationContainer) return;
+
+    paginationContainer.innerHTML = "";
+
+    const totalPages = Math.ceil(filteredPaiements.length / paymentsPerPage);
+    if (totalPages <= 1) return;
+
+    // bouton précédent
+    const prevBtn = document.createElement("button");
+    prevBtn.className = "button is-small";
+    prevBtn.textContent = "« Précédent";
+    prevBtn.disabled = currentPage === 1;
+
+    prevBtn.addEventListener("click", () => {
+        if (currentPage > 1) {
+            currentPage--;
+            paginatePayments();
+        }
+    });
+
+    paginationContainer.appendChild(prevBtn);
+
+    // boutons numérotés
+    for (let i = 1; i <= totalPages; i++) {
+        const pageBtn = document.createElement("button");
+
+        pageBtn.className =
+            "button is-small" + (i === currentPage ? " is-primary" : "");
+
+        pageBtn.textContent = i;
+
+        pageBtn.addEventListener("click", () => {
+            currentPage = i;
+            paginatePayments();
+        });
+
+        paginationContainer.appendChild(pageBtn);
+    }
+
+    // bouton suivant
+    const nextBtn = document.createElement("button");
+    nextBtn.className = "button is-small";
+    nextBtn.textContent = "Suivant »";
+    nextBtn.disabled = currentPage === totalPages;
+
+    nextBtn.addEventListener("click", () => {
+        if (currentPage < totalPages) {
+            currentPage++;
+            paginatePayments();
+        }
+    });
+
+    paginationContainer.appendChild(nextBtn);
+}
+
+
 // =====================================================
-// 5. Gestion du formulaire
+// 5. Ajout / Modification paiement
 // =====================================================
-formPaiement.addEventListener('submit', async (event) => {
-    event.preventDefault();
+formPaiement.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
     const id = paymentIdInput.value;
     const loan_id = loanSelect.value;
-    //const clients_id = loanSelect.value;
     const montant = montantInput.value;
     const date = dateInput.value;
     const mode = modeInput.value;
     const note = noteInput.value;
-    
-    if (!loan_id) {
-        showError("Veuillez sélectionner un prêt");
-        return;
-    }
-    if (!montant || montant <= 0) {
-        showError("Veuillez entrer un montant valide");
-        return;
-    }
-    if (!date) {
-        showError("Veuillez entrer une date valide");
-        return;
-    }
-    if (!mode) {
-        showError("Veuillez sélectionner un mode de paiement");
-        return;
-    }
+
+    if (!loan_id) return showError("Veuillez sélectionner un prêt");
+    if (montant <= 0) return showError("Montant invalide");
+
     try {
+        let res;
+
         if (id) {
-            // PUT
-            const res = await fetch(`/editPaiement/${encodeURIComponent(id)}`, {
+            res = await fetch(`/editPaiement/${id}`, {
                 method: "PUT",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ loan_id, montant, date, mode, note }),
+                body: JSON.stringify({ loan_id, montant, date, mode, note })
             });
-            if (!res.ok) {
-                showError("Erreur lors de la modification du paiement");
-                return;
-            }
-            formPaiement.reset();
-            paymentIdInput.value = "";
-            cancelEdit.style.display = "none";
-            submitBtn.textContent = "Ajouter le paiement";
-            await loadPayments();
-        }
-        else {
-            // POST
-            const res = await fetch("/addPaiement", {
+        } else {
+            res = await fetch("/addPaiement", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ loan_id, montant, date, mode, note }),
+                body: JSON.stringify({ loan_id, montant, date, mode, note })
             });
-            if (!res.ok) {
-                showError("Erreur lors de la création du paiement");
-                return;
-            }
-            showSuccess(id ? "Paiement modifié" : "Paiement créé !");
-            formPaiement.reset();
-            paymentIdInput.value = "";
-            cancelEdit.style.display = "none";
-            submitBtn.textContent = "Ajouter le paiement";
-            await loadPayments();
         }
-    } catch (error) {
-        showError("Erreur lors de la soumission du formulaire");
-        console.error(error);
+
+        if (!res.ok) return showError("Erreur sauvegarde paiement");
+
+        showSuccess(id ? "Paiement modifié" : "Paiement ajouté");
+
+        formPaiement.reset();
+        paymentIdInput.value = "";
+        cancelEdit.style.display = "none";
+        submitBtn.textContent = "Ajouter le paiement";
+
+        const selectedLoan = loan_id;
+        await loadLoans();
+        loanSelect.value = selectedLoan;
+        await loadPayments();
+
+    } catch (err) {
+        console.error(err);
+        showError("Erreur lors de la soumission");
     }
 });
 
+
 // =====================================================
-// 6. Edition / Suppression
+// 6. Boutons édition & suppression
 // =====================================================
 paymentsTableBody.addEventListener("click", async (e) => {
-    const editBtn = e.target.closest("button[data-edit]");
-    const delBtn = e.target.closest("button[data-del]");
+    const editBtn = e.target.closest("[data-edit]");
+    const delBtn = e.target.closest("[data-del]");
 
-    // EDIT
+    // ÉDITION
     if (editBtn) {
         const id = editBtn.dataset.edit;
-        const paiement = paiements.find(p => p.id == id);
-        
+        const p = paiements.find(x => x.id == id);
+
         paymentIdInput.value = id;
-        loanSelect.value = paiement.loan_id;
-        montantInput.value = paiement.montant;
-        dateInput.value = paiement.date;
-        modeInput.value = paiement.mode;
-        noteInput.value = paiement.note;
-        
-        submitBtn.textContent = "Modifier le paiement";
+        loanSelect.value = p.loan_id;
+        montantInput.value = p.montant;
+        dateInput.value = p.date;
+        modeInput.value = p.mode;
+        noteInput.value = p.note;
+
+        submitBtn.textContent = "Modifier";
         cancelEdit.style.display = "inline-block";
-        
+        return;
     }
 
-    // DELETE
+    // SUPPRESSION
     if (delBtn) {
         const id = delBtn.dataset.del;
-        if (confirm("Êtes-vous sûr de vouloir supprimer ce paiement ?")) {
-            try {
-                const res = await fetch(`/deletePaiement/${encodeURIComponent(id)}`, 
-                 { method: "DELETE" });
-                if (!res.ok) {
-                    showError("Erreur lors de la suppression du paiement");
-                    return;
-                }
-                showSuccess("Paiement supprimé");
-                await loadPayments();
-            } catch (error) {
-                showError("Erreur lors de la suppression du paiement");
-                console.error(error);
-            }
+
+        if (!confirm("Supprimer ce paiement ?")) return;
+
+        try {
+            const res = await fetch(`/deletePaiement/${id}`, { method: "DELETE" });
+            if (!res.ok) return showError("Erreur suppression");
+
+            showSuccess("Paiement supprimé");
+
+            const selectedLoan = loanSelect.value;
+            await loadLoans();
+            loanSelect.value = selectedLoan;
+            await loadPayments();
+
+        } catch (err) {
+            console.error(err);
         }
     }
 });
 
 
 // =====================================================
-// 7. Recherche + Filtres
-// =====================================================
-document.getElementById("filter-status").addEventListener("change", applyFilters);
-document.getElementById("filter-client").addEventListener("change", applyFilters);
-searchInput.addEventListener("input", applyFilters);
-
-function applyFilters() {
-    const status = document.getElementById("filter-status").value;
-    const clientFilter = document.getElementById("filter-client").value;
-    const q = searchInput.value.toLowerCase();
-    filteredLoans = loans.filter(l => {
-        const client = clients.find(c => String(c.id) === String(l.client_id));
-        const name = client ? `${client.prenom} ${client.nom}`.toLowerCase() : "";
-        return (!status || l.statut === status)
-            && (!clientFilter || String(l.client_id) === String(clientFilter))
-            && (name.includes(q) || String(l.id).includes(q));
-    }
-    );
-    currentPage = 1;
-    AffichageLoans();
-    renderPagination();
-}
-
-
-// =====================================================
-// 8. Annuler édition
-// =====================================================
-cancelEdit.addEventListener("click", () => {
-    formPaiement.reset();
-    paymentIdInput.value = "";
-    submitBtn.textContent = "Ajouter le paiement";
-    cancelEdit.style.display = "none";
-});
-
-
-// =====================================================
-// 9. Notifications
+// Notifications
 // =====================================================
 function showSuccess(msg) {
     const box = document.getElementById("success-message");
@@ -310,9 +324,20 @@ function showError(msg) {
     setTimeout(() => box.style.display = "none", 2500);
 }
 
+
+// =====================================================
+// Recharger paiements quand le prêt change
+// =====================================================
+loanSelect.addEventListener("change", loadPayments);
+
+
+// =====================================================
+// INIT
+// =====================================================
 async function init() {
     await loadClients();
     await loadLoans();
     await loadPayments();
 }
+
 init();

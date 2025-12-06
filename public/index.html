@@ -6,29 +6,11 @@
     <title>BES Loan Lite - Dashboard</title>
 
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@1.0.0/css/bulma.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 
     <style>
-        /* Agrandir la navbar et centrer les liens */
-        .navbar {
-            padding: 1rem 2rem;
-            font-size: 1.3rem;
-        }
-        .navbar-menu {
-            justify-content: center;
-        }
-        .navbar-item {
-            padding: 1rem 1.5rem;
-        }
-        /* Titre plus centré et plus espacés */
-        .title, .subtitle {
-            text-align: center;
-            margin-top: 20px;
-        }
-        /* Table plus large et plus jolie */
-        .dashboard-table {
-            margin-top: 30px;
-        }
+        
     </style>
 </head>
 
@@ -38,10 +20,10 @@
     <nav class="navbar is-dark">
         <div id="menu" class="navbar-menu">
             <div class="navbar-start">
-
-                <a class="navbar-item" href="index.html">Dashboard</a>
-                <a class="navbar-item" href="loans.html">Prêts</a>
-                <a class="navbar-item is-active" href="paiements.html">Paiements</a>
+				<a class="navbar-item" href="index.html">Dashboard</a>
+				<a class="navbar-item" href="loans.html">Prêts</a>
+				<a class="navbar-item" href="paiements.html">Paiements</a>
+				<a class="navbar-item" href="client.html">Client</a>
             </div>
             <div class="navbar-end">
                 <div class="navbar-item">
@@ -73,15 +55,8 @@
                     </tr>
                 </thead>
 
-                <tbody>
-                    <tr>
-                        <td>10</td>
-                        <td>5</td>
-                        <td>2</td>
-                        <td>10 000 €</td>
-                        <td>5 000 €</td>
-                        <td>John Doe (5 jours)</td>
-                    </tr>
+                <tbody id="dashboard-tbody">
+                    <!-- Données chargées par dashboard.js -->
                 </tbody>
             </table>
 
@@ -103,12 +78,7 @@
         </div>
     </section>
 
-	<!--footer class="footer">
-    <div class="content has-text-centered">
-      <p><strong>BES Loan Lite</strong> — Microcrédit interne © 2025</p>
-    </div>
-  </footer-->
-
+    <script src="dashboard.js"></script>
     <script src="user.js"></script>
 </body>
 </html>

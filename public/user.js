@@ -68,13 +68,53 @@ if (formInscription) {
   });
 }
 
-// Identification (login) — server sets a session cookie
+/*
 if (formIdentification) {
+  // Prefill from localStorage if remembered
+  try {
+    const saved = JSON.parse(localStorage.getItem('rememberedCredentials') || 'null');
+    if (saved) {
+      if (usernameInput) usernameInput.value = saved.username || '';
+      if (passwordInput) passwordInput.value = saved.password || '';
+      const rememberCheckbox = document.getElementById('rememberMe');
+      if (rememberCheckbox) rememberCheckbox.checked = true;
+    }
+  } catch (err) {
+    console.warn('Error reading remembered credentials', err);
+  }
+
   formIdentification.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const username = usernameInput.value;
     const password = passwordInput.value;
+
+    const remember = document.getElementById('rememberMe') && document.getElementById('rememberMe').checked;
+*/
+
+
+// Identification (login) — server sets a session cookie
+if (formIdentification) {
+  // Prefill from localStorage if remembered
+  try {
+    const saved = JSON.parse(localStorage.getItem('rememberedCredentials') || 'null');
+    if (saved) {
+      if (usernameInput) usernameInput.value = saved.username || '';
+      if (passwordInput) passwordInput.value = saved.password || '';
+      const rememberCheckbox = document.getElementById('rememberMe');
+      if (rememberCheckbox) rememberCheckbox.checked = true;
+    }
+  } catch (err) {
+    console.warn('Error reading remembered credentials', err);
+  }
+
+  formIdentification.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const username = usernameInput.value;
+    const password = passwordInput.value;
+
+    const remember = document.getElementById('rememberMe') && document.getElementById('rememberMe').checked;
 
     if (!username) {
       alert("Le nom d'utilisateur est requis.");
@@ -101,6 +141,17 @@ if (formIdentification) {
       }
 
       console.log("Identification réussie :", data);
+
+      // Save credentials locally if user chose to be remembered
+      try {
+        if (remember) {
+          localStorage.setItem('rememberedCredentials', JSON.stringify({ username, password }));
+        } else {
+          localStorage.removeItem('rememberedCredentials');
+        }
+      } catch (err) {
+        console.warn('Failed to save remembered credentials', err);
+      }
 
       // Redirection vers la page d'accueil (index.html)
       formIdentification.reset();

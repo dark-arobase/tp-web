@@ -1,23 +1,4 @@
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*// ...existing code...
+// ...existing code...
 const form = document.getElementById('client-form')
 const fields = {
   nom: document.getElementById('nom'),

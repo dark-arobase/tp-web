@@ -78,13 +78,38 @@ router.post("/addLoan", async (req, res) => {
 router.put("/editLoan/:id", async (req, res) => {
     try {
         const { id } = req.params;
+        console.log("ID à modifier :", id);
         const { montant, taux, duree, date } = req.body;
+
+        // Récupérer le prêt actuel pour conserver le solde
+        const oldLoan = await db("loans").where({ id }).first();
+        if (!oldLoan)
+            return res.status(404).json({ error: "Prêt introuvable." });
+
+        // Recalculer les intérêts avec les nouvelles valeurs
+        const interets = (montant * (taux / 100) * (duree / 12)).toFixed(2);
+        
+        // Calculer le nouveau montant total (montant + intérêts)
+        const montantTotal = (Number(montant) + Number(interets)).toFixed(2);
+        
+        // Calculer le nouveau solde en gardant la même proportion de remboursement
+        const ancienMontantTotal = Number(oldLoan.montant) + Number(oldLoan.interets);
+        const proportionRemboursee = ancienMontantTotal > 0 
+            ? (ancienMontantTotal - Number(oldLoan.solde)) / ancienMontantTotal 
+            : 0;
+        const nouveauSolde = (montantTotal * (1 - proportionRemboursee)).toFixed(2);
+
+        // Déterminer le statut
+        const statut = nouveauSolde <= 0 ? "REMBOURSÉ" : "ACTIF";
 
         const updated = await db("loans").where({ id }).update({
             montant,
             taux,
             duree,
-            date
+            date,
+            interets,
+            solde: nouveauSolde,
+            statut
         });
 
         if (updated === 0)
@@ -106,6 +131,10 @@ router.delete("/deleteLoan/:id", async (req, res) => {
     try {
         const { id } = req.params;
 
+        // Supprimer d'abord les paiements liés à ce prêt
+        await db("paiements").where({ loan_id: id }).del();
+        
+        // Supprimer le prêt
         const deleted = await db("loans").where({ id }).del();
 
         if (deleted === 0)

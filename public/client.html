@@ -24,6 +24,7 @@
           <div class="navbar-item">
             <div class="buttons">
               <button class="button is-light" onclick="logout()">Déconnexion</button>
+              <!---data-column="logout"><span class="log-out"></span>-->
             </div>
           </div>
         </div>
@@ -140,19 +141,19 @@
                 <table class="table is-fullwidth is-striped" id="clients-table">
                     <thead>
                         <tr>
-                            <th class="sort-link" data-column="nom" onclick="sortClients('nom')">
+                            <th class="sort-link" data-column="nom">
                                 Nom complet <span class="sort-icon"></span>
                             </th>
-                            <th class="sort-link" data-column="telephone" onclick="sortClients('telephone')">
+                            <th class="sort-link" data-column="telephone">
                                 Téléphone <span class="sort-icon"></span>
                             </th>
-                            <th class="sort-link" data-column="email" onclick="sortClients('email')">
+                            <th class="sort-link" data-column="email">
                                 Email <span class="sort-icon"></span>
                             </th>
-                            <th class="sort-link" data-column="adresse" onclick="sortClients('adresse')">
+                            <th class="sort-link" data-column="adresse">
                                 Adresse <span class="sort-icon"></span>
                             </th>
-                            <th class="sort-link" data-column="loan_count" onclick="sortClients('loan_count')">
+                            <th class="sort-link" data-column="loan_count">
                                 Prêts <span class="sort-icon"></span>
                             </th>
                             <th>Actions</th>

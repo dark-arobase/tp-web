@@ -46,7 +46,14 @@ router.post('/addClient', async (req, res) => {
 
 router.get('/allClients', async (req, res)=>{
     try{
-        const clients = await db('clients').select('*').orderBy('creer_depuis', 'desc');
+        // Récupérer tous les clients avec le nombre de prêts
+        const clients = await db('clients')
+            .leftJoin('loans', 'clients.id', 'loans.client_id')
+            .select('clients.*')
+            .count('loans.id as loan_count')
+            .groupBy('clients.id')
+            .orderBy('clients.creer_depuis', 'desc');
+        
         res.status(200).json(clients);
     }catch(err){
         console.error("Erreur /allClients", err);
@@ -57,10 +64,10 @@ router.get('/allClients', async (req, res)=>{
 /* =========================
      ROUTE : MODIFIER CLIENT
      ========================= */
-router.put('/editClient/:id', async (req, res) => {
+router.put('/updateClient/:id', async (req, res) => {
     try {
         const {id} = req.params;
-        console.log('PUT /editClient', { id, body: req.body });
+        console.log('PUT /updateClient', { id, body: req.body });
         const { nom, prenom, telephone, email, adresse } = req.body;
 
         const clientToUpdate = {};
@@ -100,7 +107,7 @@ router.put('/editClient/:id', async (req, res) => {
 
 
    }catch(err){
-      console.error("Erreur /editClient", err);
+      console.error("Erreur /updateClient", err);
       res.status(500).json({error: "Erreur serveur.." })
 
      }
@@ -115,6 +122,16 @@ router.delete('/deleteClient/:id', async (req, res) => {
 
       const {id} = req.params;
      console.log('DELETE /deleteClient', { id });
+      
+      // Supprimer d'abord les paiements liés aux prêts du client
+      await db('paiements')
+          .whereIn('loan_id', db('loans').select('id').where('client_id', id))
+          .del();
+      
+      // Supprimer les prêts du client
+      await db('loans').where('client_id', id).del();
+      
+      // Supprimer le client
       const deleted = await db("clients").where({id}).del();
       
       if (deleted ==0){

@@ -5,7 +5,7 @@ let loans = [];
 let clients = [];
 let filteredLoans = [];
 let currentPage = 1;
-let loansPerPage = 8;
+let loansPerPage = 10;
 
 
 // =====================================================
@@ -121,6 +121,7 @@ function renderPagination() {
     const totalPages = Math.ceil(filteredLoans.length / loansPerPage);
     const pagination = document.getElementById("pagination");
 
+    if (!pagination) return;
     pagination.innerHTML = "";
     if (totalPages === 0) return;
 
@@ -137,7 +138,6 @@ function renderPagination() {
         pagination.appendChild(btn);
     }
 }
-
 
 
 // =====================================================
@@ -190,11 +190,12 @@ formLoans.addEventListener("submit", async (event) => {
                 showError("Erreur lors de la modification du prêt");
                 return;
             }
+            showSuccess("Prêt modifié !");
             formLoans.reset();
             loanId.value = "";
-            showSuccess("Prêt modifié");
             cancelEdit.style.display = "none";
             submitBtn.textContent = "Créer le prêt";
+            
             await loadLoans();
         } else {
             // POST
@@ -269,7 +270,81 @@ loansTableBody.addEventListener("click", async (e) => {
 
 
 // =====================================================
-// 7. Recherche + Filtres
+// 7. Tri
+// =====================================================
+let sortColumn = "";
+let sortDirection = "asc";
+
+function sortLoans(column) {
+    if (sortColumn === column) {
+        sortDirection = sortDirection === "asc" ? "desc" : "asc";
+    } else {
+        sortColumn = column;
+        sortDirection = "asc";
+    }
+
+    filteredLoans.sort((a, b) => {
+        let valA, valB;
+
+        if (column === "client") {
+            const clientA = clients.find(c => String(c.id) === String(a.client_id));
+            const clientB = clients.find(c => String(c.id) === String(b.client_id));
+            valA = clientA ? `${clientA.prenom} ${clientA.nom}`.toLowerCase() : "";
+            valB = clientB ? `${clientB.prenom} ${clientB.nom}`.toLowerCase() : "";
+        } else if (column === "montant" || column === "taux" || column === "duree" || column === "interets" || column === "solde") {
+            valA = Number(a[column]) || 0;
+            valB = Number(b[column]) || 0;
+        } else if (column === "date") {
+            valA = new Date(a.date).getTime();
+            valB = new Date(b.date).getTime();
+        } else if (column === "statut") {
+            valA = String(a.statut || "").toLowerCase();
+            valB = String(b.statut || "").toLowerCase();
+        } else {
+            valA = String(a[column] || "").toLowerCase();
+            valB = String(b[column] || "").toLowerCase();
+        }
+
+        if (valA < valB) return sortDirection === "asc" ? -1 : 1;
+        if (valA > valB) return sortDirection === "asc" ? 1 : -1;
+        return 0;
+    });
+
+    currentPage = 1;
+    AffichageLoans();
+    renderPagination();
+    updateSortIcons();
+}
+
+function updateSortIcons() {
+    const headers = document.querySelectorAll(".sort-link");
+    headers.forEach(th => {
+        const col = th.dataset.column;
+        const icon = th.querySelector(".sort-icon");
+        if (!icon) return;
+
+        if (col === sortColumn) {
+            icon.textContent = sortDirection === "asc" ? "▲" : "▼";
+        } else {
+            icon.textContent = "";
+        }
+    });
+}
+
+// Attacher événements de tri
+document.addEventListener('DOMContentLoaded', () => {
+    const sortLinks = document.querySelectorAll('.sort-link');
+    sortLinks.forEach(link => {
+        link.style.cursor = 'pointer';
+        link.addEventListener('click', () => {
+            const column = link.dataset.column;
+            sortLoans(column);
+        });
+    });
+});
+
+// =====================================================
+// 8. Recherche + Filtres
 // =====================================================
 document.getElementById("filter-status").addEventListener("change", applyFilters);
 document.getElementById("filter-client").addEventListener("change", applyFilters);
@@ -297,7 +372,7 @@ function applyFilters() {
 
 
 // =====================================================
-// 8. Annuler édition
+// 9. Annuler édition
 // =====================================================
 cancelEdit.addEventListener("click", () => {
     formLoans.reset();
@@ -309,7 +384,7 @@ cancelEdit.addEventListener("click", () => {
 
 
 // =====================================================
-// 9. Notifications
+// 10. Notifications
 // =====================================================
 function showSuccess(msg) {
     const box = document.getElementById("success-message");

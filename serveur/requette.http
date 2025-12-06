@@ -1,81 +1,209 @@
-#############
+####################################################################
+#                  BES LOAN LITE - API TESTS                      #
+#                     Date: 2025-12-05                             #
+####################################################################
+
+####################################################################
+#                    TESTS - GESTION CLIENTS                       #
+####################################################################
+
+### 1. Récupérer tous les clients
+curl -X GET http://localhost:3000/allClients
+
+### 2. Ajouter un nouveau client
 curl -X POST http://localhost:3000/addClient \
      -H "Content-Type: application/json" \
-     -d '{  
-           "nom": "Doe",
-           "prenom": "John",
-           "telephone": "1234567890",
-           "email": "john.doe@example.com",
-           "adresse": "123 Main St"
+     -d '{
+           "nom": "Tremblay",
+           "prenom": "Marie",
+           "telephone": "5145559876",
+           "email": "marie.tremblay@example.com",
+           "adresse": "456 Rue Sherbrooke, Montreal, QC"
          }'
-#############
 
-############
-curl -X GET  http://localhost:3000/allclients
-############
-curl -X GET  http://localhost:3000/client/010840e8-272a-4144-bcc9-8610a82129fd
-#############
-curl -X DELETE http://localhost:3000/deleteClient/010840e8-272a-4144-bcc9-8610a82129fd
-#############
-curl -X PUT http://localhost:3000/updateClient/010840e8-272a-4144-bcc9-8610a82129fd \
+### 3. Modifier un client (remplacer l'ID)
+curl -X PUT http://localhost:3000/updateClient/e719a1f7-db3c-40bb-9bea-e2ac86c936be \
      -H "Content-Type: application/json" \
-     -d '{  
-           "nom": "Smith",
-           "prenom": "Jane",
-           "telephone": "0987654321",
-           "email": "jane.smith@example.com",
-           "adresse": "456 Elm St"
-            }'
-#############
-curl -X GET  http://localhost:3000/addloans
-      -H "Content-Type: application/json" \
-      -d '{
-            "clientId": "010840e8-272a-4144-bcc9-8610a82129fd",
-            "amount": 5000,
-            "interestRate": 5.5,
-            "termMonths": 24
-          }'
-#############
-curl -X GET  http://localhost:3000/allloans
-#############
-curl -X GET  http://localhost:3000/loan/{loanId}
-#############
-curl -X DELETE http://localhost:3000/deleteloan/{loanId}
-#############
-curl -X PUT http://localhost:3000/updateloan/{loanId} \
-      -H "Content-Type: application/json" \
-      -d '{
-             "amount": 6000,
-             "interestRate": 6.0,
-             "termMonths": 30
-          }'
-#############
-curl -X POST http://localhost:3000/addpayment \
-      -H "Content-Type: application/json" \
-      -d '{
-            "loanId": "{loanId}",
-            "paymentDate": "2024-10-01",
-            "amount": 250
-          }'
-#############
-curl -X GET  http://localhost:3000/allpayments
-#############
-curl -X GET  http://localhost:3000/payment/{paymentId}
-#############
-curl -X DELETE http://localhost:3000/deletepayment/{paymentId}
-#############
-curl -X PUT http://localhost:3000/updatepayment/{paymentId} \
-      -H "Content-Type: application/json" \
-      -d '{
-            "paymentDate": "2024-11-01",
-            "amount": 300
-          }'
-#############
-curl -X GET  http://localhost:3000/addLoansToClient \
-      -H "Content-Type: application/json" \
-      -d '{
-            "clientId": "010840e8-272a-4144-bcc9-8610a82129fd",
-            "amount": 5000,
-            "interestRate": 5.5,
-            "termMonths": 24
-          }'
+     -d '{
+           "nom": "Tremblay",
+           "prenom": "Marie-Claude",
+           "telephone": "5145559999",
+           "email": "marie.claude@example.com",
+           "adresse": "789 Boulevard René-Lévesque, Montreal, QC"
+         }'
+
+### 4. Supprimer un client (remplacer l'ID)
+curl -X DELETE http://localhost:3000/deleteClient/e719a1f7-db3c-40bb-9bea-e2ac86c936be
+
+####################################################################
+#                     TESTS - GESTION PRÊTS                        #
+####################################################################
+
+### 5. Récupérer tous les prêts
+curl -X GET http://localhost:3000/allLoans
+
+### 6. Créer un nouveau prêt (utiliser un client_id existant)
+curl -X POST http://localhost:3000/addLoan \
+     -H "Content-Type: application/json" \
+     -d '{
+           "client_id": "e719a1f7-db3c-40bb-9bea-e2ac86c936be",
+           "montant": 5000,
+           "taux": 6,
+           "duree": 24,
+           "date": "2025-12-05"
+         }'
+
+### 7. Modifier un prêt (remplacer l'ID)
+curl -X PUT http://localhost:3000/editLoan/LOAN_ID_HERE \
+     -H "Content-Type: application/json" \
+     -d '{
+           "client_id": "e719a1f7-db3c-40bb-9bea-e2ac86c936be",
+           "montant": 6000,
+           "taux": 5.5,
+           "duree": 30,
+           "date": "2025-12-05"
+         }'
+
+### 8. Supprimer un prêt (remplacer l'ID)
+curl -X DELETE http://localhost:3000/deleteLoan/LOAN_ID_HERE
+
+####################################################################
+#                   TESTS - GESTION PAIEMENTS                      #
+####################################################################
+
+### 9. Récupérer tous les paiements
+curl -X GET http://localhost:3000/allPaiements
+
+### 10. Récupérer les paiements d'un prêt spécifique (remplacer l'ID)
+curl -X GET http://localhost:3000/paiements/LOAN_ID_HERE
+
+### 11. Ajouter un paiement (utiliser un loan_id existant)
+curl -X POST http://localhost:3000/addPaiement \
+     -H "Content-Type: application/json" \
+     -d '{
+           "loan_id": "LOAN_ID_HERE",
+           "montant": 250,
+           "date": "2025-12-15",
+           "mode": "Cash",
+           "note": "Premier paiement mensuel"
+         }'
+
+### 12. Modifier un paiement (remplacer l'ID)
+curl -X PUT http://localhost:3000/editPaiement/PAYMENT_ID_HERE \
+     -H "Content-Type: application/json" \
+     -d '{
+           "loan_id": "LOAN_ID_HERE",
+           "montant": 300,
+           "date": "2025-12-15",
+           "mode": "Virement",
+           "note": "Paiement modifié"
+         }'
+
+### 13. Supprimer un paiement (remplacer l'ID)
+curl -X DELETE http://localhost:3000/deletePaiement/PAYMENT_ID_HERE
+
+####################################################################
+#                 TESTS - SCÉNARIO COMPLET                         #
+####################################################################
+
+### SCÉNARIO 1: Créer un client avec prêt et paiements
+
+# Étape 1: Créer le client
+curl -X POST http://localhost:3000/addClient \
+     -H "Content-Type: application/json" \
+     -d '{
+           "nom": "Bouchard",
+           "prenom": "Jean",
+           "telephone": "4385551234",
+           "email": "jean.bouchard@example.com",
+           "adresse": "100 Rue Ontario, Montreal, QC"
+         }'
+
+# Étape 2: Copier le client_id retourné, puis créer le prêt
+# curl -X POST http://localhost:3000/addLoan \
+#      -H "Content-Type: application/json" \
+#      -d '{
+#            "client_id": "COPIER_LE_CLIENT_ID_ICI",
+#            "montant": 10000,
+#            "taux": 8,
+#            "duree": 12,
+#            "date": "2025-12-05"
+#          }'
+
+# Étape 3: Copier le loan_id retourné, puis ajouter un paiement
+# curl -X POST http://localhost:3000/addPaiement \
+#      -H "Content-Type: application/json" \
+#      -d '{
+#            "loan_id": "COPIER_LE_LOAN_ID_ICI",
+#            "montant": 900,
+#            "date": "2025-12-05",
+#            "mode": "Virement",
+#            "note": "Paiement initial"
+#          }'
+
+# Étape 4: Vérifier que le solde du prêt a été mis à jour
+# curl -X GET http://localhost:3000/allLoans
+
+####################################################################
+#                    TESTS DE VALIDATION                           #
+####################################################################
+
+### TEST ERREUR: Client sans nom (doit retourner 400)
+curl -X POST http://localhost:3000/addClient \
+     -H "Content-Type: application/json" \
+     -d '{
+           "prenom": "Test",
+           "telephone": "5145550000",
+           "email": "test@example.com",
+           "adresse": "123 Test St"
+         }'
+
+### TEST ERREUR: Client avec email invalide (doit retourner 400)
+curl -X POST http://localhost:3000/addClient \
+     -H "Content-Type: application/json" \
+     -d '{
+           "nom": "Test",
+           "prenom": "Test",
+           "telephone": "5145550000",
+           "email": "email-invalide",
+           "adresse": "123 Test St"
+         }'
+
+### TEST ERREUR: Prêt sans client_id (doit retourner 400)
+curl -X POST http://localhost:3000/addLoan \
+     -H "Content-Type: application/json" \
+     -d '{
+           "montant": 5000,
+           "taux": 6,
+           "duree": 24,
+           "date": "2025-12-05"
+         }'
+
+### TEST ERREUR: Paiement avec montant négatif (doit retourner 400)
+curl -X POST http://localhost:3000/addPaiement \
+     -H "Content-Type: application/json" \
+     -d '{
+           "loan_id": "LOAN_ID_HERE",
+           "montant": -100,
+           "date": "2025-12-05",
+           "mode": "Cash",
+           "note": "Test erreur"
+         }'
+
+####################################################################
+#                       NOTES D'UTILISATION                        #
+####################################################################
+# 
+# 1. Remplacer LOAN_ID_HERE, PAYMENT_ID_HERE avec vos vrais IDs
+# 
+# 2. Copier-coller les commandes curl dans votre terminal
+# 
+# 3. Ordre de test recommandé:
+#    a) Créer un client
+#    b) Créer un prêt pour ce client
+#    c) Ajouter des paiements
+#    d) Vérifier les mises à jour
+#    e) Tester les modifications
+#    f) Tester les suppressions
+# 
+####################################################################

@@ -4,7 +4,7 @@
 let clients = [];
 let filteredClients = [];
 let currentPage = 1;
-let clientsPerPage = 10;
+let clientsPerPage = 8;
 let sortColumn = "";
 let sortDirection = "asc";
 
@@ -287,7 +287,7 @@ formClient.addEventListener('submit', async (event) => {
         try {
             if (id) {
                 // PUT update
-                const res = await fetch(`/editClient/${encodeURIComponent(id)}`, {
+                const res = await fetch(`/updateClient/${encodeURIComponent(id)}`, {
                     method: "PUT",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ nom, prenom, telephone, email, adresse })
@@ -403,5 +403,36 @@ function showError(message = "Erreur.") {
     setTimeout(() => { box.style.display = "none"; }, 2500);
 }
 
+// Attacher les événements de tri
+document.addEventListener('DOMContentLoaded', () => {
+    const sortLinks = document.querySelectorAll('.sort-link');
+    sortLinks.forEach(link => {
+        link.style.cursor = 'pointer';
+        link.addEventListener('click', () => {
+            const column = link.dataset.column;
+            sortClients(column);
+        });
+    });
+});
+
+
+document.addEventListener(DOMcontent)
+
+
+/*
+Attacher les événements de tri*
+document.addEventListener('Loaded', () => {
+    const sortLinks = document.querySelectorAll('log-out');
+    sortLinks.forEach(link => {
+        link.style.cursor = 'pointer';
+        link.addEventListener('click', () => {
+            const column = link.dataset.column;
+            sortClients(column);
+        });
+    });
+});
+
+document.addEventListener(Loaded)
+*/
 
 loadClients();
